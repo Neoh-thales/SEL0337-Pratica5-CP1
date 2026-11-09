@@ -1,0 +1,25 @@
+# SEL0337 - Pratica 5 - Checkpoint 1
+# Unit file que coloca o blink.py a disposicao do systemd, para o LED comecar a
+# piscar ja no boot da Raspberry Pi, sem ninguem precisar logar no sistema.
+# Instalar em /lib/systemd/system/blink.service
+
+[Unit]
+# Texto exibido no boot: "[ OK ] Started Blink LED em Python"
+Description=Blink LED em Python
+# Inicia depois que o sistema chegou ao modo multiusuario
+After=multi-user.target
+
+[Service]
+Type=simple
+# O interpretador e chamado explicitamente: o .py depende dele para executar.
+# -u desativa o buffer de saida, para os prints chegarem logo ao journal.
+ExecStart=/usr/bin/python3 -u /home/sel/pratica5/blink.py
+# Executado ao parar o servico, antes do SIGTERM enviado ao ExecStart
+ExecStop=/usr/bin/python3 -u /home/sel/pratica5/blink_off.py
+# Usuario em minusculas e com "User" maiusculo: o systemd diferencia os dois.
+# O usuario sel precisa estar no grupo gpio (padrao no Raspberry Pi OS).
+User=sel
+
+[Install]
+# Com "systemctl enable", o servico passa a fazer parte do boot multiusuario
+WantedBy=multi-user.target
